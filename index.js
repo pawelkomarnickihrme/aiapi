@@ -40,6 +40,7 @@ const logger = winston.createLogger({
 app.post("/api/query", async (req, res) => {
   try {
     const { query } = req.body;
+    console.log(query);
 
     if (!query) {
       return res.status(400).json({ error: "Query is required" });
@@ -65,6 +66,10 @@ app.post("/api/query", async (req, res) => {
 
     const responseData = perplexityResponse.data;
     cache.set(query, responseData);
+    console.log(
+      "Przetworzone dane odpowiedzi:",
+      JSON.parse(JSON.stringify(responseData))
+    );
 
     res.json(responseData);
   } catch (error) {
