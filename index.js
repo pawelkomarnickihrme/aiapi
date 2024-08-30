@@ -8,16 +8,25 @@ app.use(express.json());
 
 app.post("/api/perplexity", async (req, res) => {
   try {
-    // Extract data from the request body
-    const { model, messages } = req.body;
+    // Example data structure
+    const data = {
+      model: "llama-3.1-sonar-small-128k-online",
+      messages: [
+        {
+          role: "system",
+          content: "Be precise and concise.",
+        },
+        {
+          role: "user",
+          content: "How many stars are there in our galaxy?",
+        },
+      ],
+    };
 
     // Make a POST request to the external API
     const response = await axios.post(
       "https://api.perplexity.ai/chat/completions",
-      {
-        model,
-        messages,
-      },
+      data,
       {
         headers: {
           Accept: "application/json",
