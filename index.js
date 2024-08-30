@@ -7,6 +7,9 @@ const app = express();
 app.use(express.json());
 
 app.post("/api/perplexity", async (req, res) => {
+  require("dotenv").config();
+
+  const { query } = req.body;
   try {
     // Example data structure
     const data = {
@@ -18,7 +21,7 @@ app.post("/api/perplexity", async (req, res) => {
         },
         {
           role: "user",
-          content: "How many stars are there in our galaxy?",
+          content: query,
         },
       ],
     };
@@ -30,8 +33,7 @@ app.post("/api/perplexity", async (req, res) => {
       {
         headers: {
           Accept: "application/json",
-          Authorization:
-            "Bearer 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",
+          Authorization: `Bearer ${process.env.PERPLEXITY_API_KEY}`,
           "Content-Type": "application/json",
         },
       }
