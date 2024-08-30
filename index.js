@@ -55,7 +55,10 @@ app.post("/api/query", async (req, res) => {
     const perplexityResponse = await pplx.post_chat_completions({
       model: "llama-3.1-sonar-small-128k-online",
       messages: [
-        { role: "system", content: "Be precise and concise." },
+        {
+          role: "system",
+          content: "Napisz streszczenie kisazki ktora uzytkownik wyslalem.",
+        },
         { role: "user", content: query },
       ],
     });
@@ -66,6 +69,7 @@ app.post("/api/query", async (req, res) => {
     res.json(responseData);
   } catch (error) {
     logger.error("Error:", error);
+    console.log(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
