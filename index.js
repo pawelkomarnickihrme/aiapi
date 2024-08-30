@@ -10,11 +10,16 @@ const port = process.env.PORT || 3000;
 const cache = new NodeCache({ stdTTL: 600 }); // Cache na 10 minut
 
 app.use(express.json());
-
+app.set("trust proxy", 1);
 // Konfiguracja limitera zapytań
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minut
-  max: 100, // limit 100 zapytań na 15 minut
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    return req.ip;
+  },
 });
 
 app.use("/api/", limiter);
