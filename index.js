@@ -33,7 +33,10 @@ app.post("/api/perplexity", async (req, res) => {
       {
         headers: {
           Accept: "application/json",
-          Authorization: `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+          Authorization: `Bearer ${process.env.PERPLEXITY_API_KEY.replace(
+            /^.*?(pplx-)/,
+            "$1"
+          )}`,
           "Content-Type": "application/json",
         },
       }
