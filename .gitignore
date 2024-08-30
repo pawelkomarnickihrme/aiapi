@@ -1,0 +1,41 @@
+/node_modules
+.env    
+
+//jak nazawac plik gitignore
+
+# Prawidłowa nazwa pliku to .gitignore (bez litery 'n' w środku)
+
+# Typowe pliki i katalogi do ignorowania w projektach Node.js:
+node_modules/
+npm-debug.log
+yarn-error.log
+.env
+.env.local
+.env.*.local
+
+# Logi
+*.log
+
+# Katalogi systemu operacyjnego
+.DS_Store
+Thumbs.db
+
+# Katalogi IDE i edytorów
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Pliki budowania i dystrybucji
+/dist
+/build
+
+# Opcjonalne: ignoruj pliki konfiguracyjne specyficzne dla użytkownika
+.npmrc
+.yarnrc
+
+# Opcjonalne: ignoruj pliki tymczasowe
+*.tmp
+*.temp
+
+
