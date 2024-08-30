@@ -11,7 +11,6 @@ const cache = new NodeCache({ stdTTL: 600 }); // Cache na 10 minut
 
 app.use(express.json());
 app.set("trust proxy", 1);
-// Konfiguracja limitera zapytań
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -24,7 +23,6 @@ const limiter = rateLimit({
 
 app.use("/api/", limiter);
 
-// Konfiguracja loggera
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.json(),
@@ -34,19 +32,15 @@ const logger = winston.createLogger({
     new winston.transports.File({ filename: "combined.log" }),
   ],
 });
-
-// Endpoint do obsługi zapytań Perplexity AI
 app.post("/api/query", async (req, res) => {
   try {
     const { query } = req.body;
 
-    // Sprawdź, czy odpowiedź jest w cache
     const cachedResponse = cache.get(query);
     if (cachedResponse) {
       return res.json(cachedResponse);
     }
 
-    // Jeśli nie ma w cache, zapytaj Perplexity AI API
     const perplexityResponse = await axios.post(
       "https://api.perplexity.ai/chat/completions",
       {
@@ -64,19 +58,15 @@ app.post("/api/query", async (req, res) => {
       }
     );
 
-    // Zapisz odpowiedź w cache
     cache.set(query, perplexityResponse.data);
 
     res.json(perplexityResponse.data);
   } catch (error) {
     logger.error("Błąd:", error);
-    res
-      .status(500)
-      .json({ error: "Wystąpił błąd podczas przetwarzania zapytania" });
+    res.status(500).json({ error });
   }
 });
 
-// Obsługa błędów
 app.use((err, req, res, next) => {
   logger.error(err.stack);
   res.status(500).send("Coś poszło nie tak!");
