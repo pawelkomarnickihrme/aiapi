@@ -1,89 +1,42 @@
 const express = require("express");
 const axios = require("axios");
-const NodeCache = require("node-cache");
-const rateLimit = require("express-rate-limit");
-const winston = require("winston");
-const pplx = require("./api/apis/pplx/index.js");
-require("dotenv").config();
-
-// Import or define 'pplx' here
-// Example: const pplx = require('perplexity-client'); // Replace with actual module
 
 const app = express();
-const port = process.env.PORT || 3000;
-const cache = new NodeCache({ stdTTL: 600 }); // Cache for 10 minutes
-console.log(process.env.PERPLEXITY_API_KEY);
+
+// Middleware to parse JSON bodies
 app.use(express.json());
-app.set("trust proxy", 1);
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: (req) => {
-    return req.ip;
-  },
-});
 
-app.use("/api/", limiter);
-
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.json(),
-  defaultMeta: { service: "perplexity-service" },
-  transports: [
-    new winston.transports.File({ filename: "error.log", level: "error" }),
-    new winston.transports.File({ filename: "combined.log" }),
-  ],
-});
-
-app.post("/api/query", async (req, res) => {
+app.post("/api/perplexity", async (req, res) => {
   try {
-    const { query } = req.body;
-    console.log(query);
+    // Extract data from the request body
+    const { model, messages } = req.body;
 
-    if (!query) {
-      return res.status(400).json({ error: "Query is required" });
-    }
-
-    const cachedResponse = cache.get(query);
-    if (cachedResponse) {
-      return res.json(cachedResponse);
-    }
-
-    // Ensure 'pplx' is properly initialized and replace with actual API call
-    pplx.auth(process.env.PERPLEXITY_API_KEY);
-    const perplexityResponse = await pplx.post_chat_completions({
-      model: "llama-3.1-sonar-small-128k-online",
-      messages: [
-        {
-          role: "system",
-          content: "Napisz streszczenie kisazki ktora uzytkownik wyslalem.",
+    // Make a POST request to the external API
+    const response = await axios.post(
+      "https://api.perplexity.ai/chat/completions",
+      {
+        model,
+        messages,
+      },
+      {
+        headers: {
+          Accept: "application/json",
+          Authorization:
+            "Bearer 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",
+          "Content-Type": "application/json",
         },
-        { role: "user", content: query },
-      ],
-    });
-
-    const responseData = perplexityResponse.data;
-    cache.set(query, responseData);
-    console.log(
-      "Przetworzone dane odpowiedzi:",
-      JSON.parse(JSON.stringify(responseData))
+      }
     );
 
-    res.json(responseData);
+    // Send the response from the external API back to the client
+    res.json(response.data);
   } catch (error) {
-    logger.error("Error:", error);
-    console.log(error);
+    console.error("Error making request:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-app.use((err, req, res, next) => {
-  logger.error(err.stack);
-  res.status(500).send("Something went wrong!");
-});
-
-app.listen(port, () => {
-  console.log(`Perplexity proxy service running on port ${port}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
