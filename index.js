@@ -12,7 +12,7 @@ require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 3000;
 const cache = new NodeCache({ stdTTL: 600 }); // Cache for 10 minutes
-
+console.log(process.env.PERPLEXITY_API_KEY);
 app.use(express.json());
 app.set("trust proxy", 1);
 const limiter = rateLimit({
